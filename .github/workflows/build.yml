@@ -22,14 +22,13 @@ jobs:
           echo "latest_version=$VERSION" >> $GITHUB_OUTPUT
           
           # 检查该版本是否已存在
-          EXISTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/user/packages/container/nezha-ag/versions | jq -r 'first(.[]?.metadata?.container?.tags // [] | select(. == "'"$VERSION"'"))')
-          if [ -n "$EXISTS" ] && [ "$EXISTS" != "null" ]; then
-            EXISTS="true"
+          TAGS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/user/packages/container/nezha-ag/versions | jq -r '[.[]?.metadata?.container?.tags // []] | flatten')
+          if echo "$TAGS" | grep -q "$VERSION"; then
+            echo "exists=true" >> $GITHUB_OUTPUT
           else
-            EXISTS="false"
+            echo "exists=false" >> $GITHUB_OUTPUT
           fi
-          echo "exists=${EXISTS}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU & Buildx
         if: steps.get_version.outputs.exists == 'false'
