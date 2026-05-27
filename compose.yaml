@@ -1,0 +1,11 @@
+services:
+  nezha-ag:
+    image: ghcr.io/1szt/nezha-ag:latest
+    container_name: nezha-ag
+    pid: host
+    network_mode: host
+    environment:
+      - NZ_SERVER=${NZ_SERVER}
+      - NZ_CLIENT_SECRET=${NZ_CLIENT_SECRET}
+      - NZ_UUID=${NZ_UUID}
+
