@@ -23,9 +23,10 @@ jobs:
           
           # 检查该版本是否已存在
           EXISTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/user/packages/container/nezha-ag/versions | jq -r '.[]?.metadata?.container?.tags // [] | any(. == "'"$VERSION"'") | tostring')
-          # 如果jq返回空或错误，默认设为false（表示版本不存在）
-          if [ -z "$EXISTS" ] || [ "$EXISTS" = "null" ]; then
+            https://api.github.com/user/packages/container/nezha-ag/versions | jq -r 'first(.[]?.metadata?.container?.tags // [] | select(. == "'"$VERSION"'"))')
+          if [ -n "$EXISTS" ] && [ "$EXISTS" != "null" ]; then
+            EXISTS="true"
+          else
             EXISTS="false"
           fi
           echo "exists=${EXISTS}" >> $GITHUB_OUTPUT
