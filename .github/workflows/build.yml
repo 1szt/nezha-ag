@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: '0 * * * *' # 每小时执行一次，自动检查
   workflow_dispatch:     # 允许你手动点击立即构建
+    inputs:
+      force_build:
+        description: '强制构建，即使版本已存在'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   build:
@@ -31,13 +37,13 @@ jobs:
           fi
 
       - name: Set up QEMU & Buildx
-        if: steps.get_version.outputs.exists == 'false'
+        if: steps.get_version.outputs.exists == 'false' || inputs.force_build == true
         uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
-        if: steps.get_version.outputs.exists == 'false'
+        if: steps.get_version.outputs.exists == 'false' || inputs.force_build == true
 
       - name: Login to GHCR
-        if: steps.get_version.outputs.exists == 'false'
+        if: steps.get_version.outputs.exists == 'false' || inputs.force_build == true
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -45,7 +51,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Push
-        if: steps.get_version.outputs.exists == 'false'
+        if: steps.get_version.outputs.exists == 'false' || inputs.force_build == true
         uses: docker/build-push-action@v5
         with:
           context: .
